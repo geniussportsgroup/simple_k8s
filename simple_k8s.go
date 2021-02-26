@@ -5,7 +5,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"log"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	Set "github.com/geniussportsgroup/treaps"
 )
@@ -100,4 +105,22 @@ func SetNumberOfPods(numPods int32, currentNumOfPods *int32,
 	*currentNumOfPods = scale.Spec.Replicas
 
 	return true, nil
+}
+
+// goroutine for handling SIGTERM
+func TerminationHandler(timeout time.Duration) {
+
+	log.Printf("Setting termination handler for process pid = %d", os.Getpid())
+	signChannel := make(chan os.Signal, 1)
+
+	signal.Ignore(syscall.SIGINT, syscall.SIGQUIT, syscall.SIGCONT)
+	signal.Notify(signChannel, syscall.SIGTERM)
+
+	sig := <-signChannel
+
+	log.Printf("Termination received (%s)", sig.String())
+
+	time.Sleep(timeout)
+
+	os.Exit(0)
 }
