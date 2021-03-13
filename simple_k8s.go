@@ -1,6 +1,8 @@
 package simple_k8s
 
 import (
+	"errors"
+	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -48,16 +50,27 @@ func FindDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 		return nil, err
 	}
 
-	ret := Set.NewTreap(func(i1, i2 interface{}) bool {
+	cmpStr := func(i1, i2 interface{}) bool {
 		return i1.(string) < i2.(string)
-	})
+	}
+
+	ret := Set.NewTreap(cmpStr)
+	foundClues := Set.NewTreap(cmpStr)
 
 	for _, item := range list.Items {
 		for _, clue := range clues {
 			if strings.Contains(item.ObjectMeta.Name, clue.(string)) {
 				ret.Insert(item.ObjectMeta.Name)
+				foundClues.Insert(clue)
 				break
 			}
+		}
+	}
+
+	// check that all the clues were found in the deployment names
+	for _, clue := range clues {
+		if foundClues.Search(clue) == nil {
+			return nil, errors.New(fmt.Sprintf("Deployment name containing clue %s was not found", clue))
 		}
 	}
 
