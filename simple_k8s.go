@@ -14,6 +14,8 @@ import (
 	"syscall"
 	"time"
 
+	Functional "github.com/geniussportsgroup/FunctionalLib"
+	List "github.com/geniussportsgroup/Slist"
 	Set "github.com/geniussportsgroup/treaps"
 )
 
@@ -61,6 +63,52 @@ func FindDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 		for _, clue := range clues {
 			if strings.Contains(item.ObjectMeta.Name, clue.(string)) {
 				ret.Insert(item.ObjectMeta.Name)
+				foundClues.Insert(clue)
+				break
+			}
+		}
+	}
+
+	// check that all the clues were found in the deployment names
+	for _, clue := range clues {
+		if foundClues.Search(clue) == nil {
+			return nil, errors.New(fmt.Sprintf("Deployment name containing clue %s was not found", clue))
+		}
+	}
+
+	return ret, nil
+}
+
+// Return a list of pair <clue, deployName> containing all the found namespaces whose name contains any given clue as substring.
+func ReadDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSelector string,
+	clues ...interface{}) (*List.Slist, error) {
+
+	list, err := kubectl.AppsV1().Deployments(kubeNamespace).List(metav1.ListOptions{
+		TypeMeta:            metav1.TypeMeta{},
+		LabelSelector:       labelSelector,
+		FieldSelector:       "",
+		Watch:               false,
+		AllowWatchBookmarks: false,
+		ResourceVersion:     "",
+		TimeoutSeconds:      nil,
+		Limit:               0,
+		Continue:            "",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	cmpStr := func(i1, i2 interface{}) bool {
+		return i1.(string) < i2.(string)
+	}
+
+	ret := List.New()
+	foundClues := Set.NewTreap(cmpStr)
+
+	for _, item := range list.Items {
+		for _, clue := range clues {
+			if strings.Contains(item.ObjectMeta.Name, clue.(string)) {
+				ret.Append(Functional.Pair{Item1: clue, Item2: item.ObjectMeta.Name})
 				foundClues.Insert(clue)
 				break
 			}
