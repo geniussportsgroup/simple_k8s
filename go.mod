@@ -1,6 +1,6 @@
 module github.com/geniussportsgroup/simple_k8s
 
-go 1.13
+go 1.15
 
 require (
 	github.com/geniussportsgroup/treaps v1.1.1
