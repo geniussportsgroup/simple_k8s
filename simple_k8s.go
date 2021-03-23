@@ -81,7 +81,7 @@ func FindDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 
 // Return a list of pair <clue, deployName> containing all the found namespaces whose name contains any given clue as substring.
 func ReadDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSelector string,
-	clues ...interface{}) (*List.Slist, error) {
+	clues *List.Slist) (*List.Slist, error) {
 
 	list, err := kubectl.AppsV1().Deployments(kubeNamespace).List(metav1.ListOptions{
 		TypeMeta:            metav1.TypeMeta{},
@@ -106,8 +106,9 @@ func ReadDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 	foundClues := Set.NewTreap(cmpStr)
 
 	for _, item := range list.Items {
-		for _, clue := range clues {
-			if strings.Contains(item.ObjectMeta.Name, clue.(string)) {
+		for it := List.NewIterator(clues); it.HasCurr(); it.Next() {
+			clue := it.GetCurr().(string)
+			if strings.Contains(item.ObjectMeta.Name, clue) {
 				ret.Append(Functional.Pair{Item1: clue, Item2: item.ObjectMeta.Name})
 				foundClues.Insert(clue)
 				break
@@ -116,7 +117,8 @@ func ReadDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 	}
 
 	// check that all the clues were found in the deployment names
-	for _, clue := range clues {
+	for it := List.NewIterator(clues); it.HasCurr(); it.Next() {
+		clue := it.GetCurr().(string)
 		if foundClues.Search(clue) == nil {
 			return nil, errors.New(fmt.Sprintf("Deployment name containing clue %s was not found", clue))
 		}
