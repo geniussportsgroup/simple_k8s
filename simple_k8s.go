@@ -119,7 +119,11 @@ func ReadDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 	}
 
 	return FunctionalLib.Map(clues, func(i interface{}) interface{} {
-		return cluesToDeployName[i.(string)]
+		clue := i.(string)
+		return FunctionalLib.Pair{
+			Item1: clue,
+			Item2: cluesToDeployName[clue],
+		}
 	}), nil
 }
 
