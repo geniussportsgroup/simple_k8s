@@ -3,6 +3,7 @@ package simple_k8s
 import (
 	"errors"
 	"fmt"
+	"github.com/geniussportsgroup/FunctionalLib"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -14,7 +15,6 @@ import (
 	"syscall"
 	"time"
 
-	Functional "github.com/geniussportsgroup/FunctionalLib"
 	List "github.com/geniussportsgroup/Slist"
 	Set "github.com/geniussportsgroup/treaps"
 )
@@ -98,19 +98,13 @@ func ReadDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 		return nil, err
 	}
 
-	cmpStr := func(i1, i2 interface{}) bool {
-		return i1.(string) < i2.(string)
-	}
-
-	ret := List.New()
-	foundClues := Set.NewTreap(cmpStr)
+	cluesToDeployName := make(map[string]string)
 
 	for _, item := range list.Items {
 		for it := List.NewIterator(clues); it.HasCurr(); it.Next() {
 			clue := it.GetCurr().(string)
 			if strings.Contains(item.ObjectMeta.Name, clue) {
-				ret.Append(Functional.Pair{Item1: clue, Item2: item.ObjectMeta.Name})
-				foundClues.Insert(clue)
+				cluesToDeployName[clue] = item.ObjectMeta.Name
 				break
 			}
 		}
@@ -119,12 +113,14 @@ func ReadDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 	// check that all the clues were found in the deployment names
 	for it := List.NewIterator(clues); it.HasCurr(); it.Next() {
 		clue := it.GetCurr().(string)
-		if foundClues.Search(clue) == nil {
+		if _, found := cluesToDeployName[clue]; !found {
 			return nil, errors.New(fmt.Sprintf("Deployment name containing clue %s was not found", clue))
 		}
 	}
 
-	return ret, nil
+	return FunctionalLib.Map(clues, func(i interface{}) interface{} {
+		return cluesToDeployName[i.(string)]
+	}), nil
 }
 
 func GetNumberOfPods(kubectl *kubernetes.Clientset, kubeNamespace string,
