@@ -19,6 +19,12 @@ import (
 	Set "github.com/geniussportsgroup/treaps"
 )
 
+const HealthyFileName = "/tmp/healthy"
+
+func CreateHealthyFile(name string) {
+	os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0666)
+}
+
 func NewKubernetesClient(pathToConf string) (*kubernetes.Clientset, error) {
 	var config *rest.Config
 	var err error
