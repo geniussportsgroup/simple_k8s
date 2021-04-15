@@ -33,7 +33,7 @@ func NewKubernetesClient(pathToConf string) (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-// Return a set containing all the found namespaces whose name contains any given clue as substring.
+// FindDeploymentNames Return a set containing all the found namespaces whose name contains any given clue as substring.
 func FindDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSelector string,
 	clues ...interface{}) (*Set.Treap, error) {
 
@@ -79,7 +79,7 @@ func FindDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 	return ret, nil
 }
 
-// Return a list of pair <clue, deployName> containing all the found namespaces whose name contains any given clue as substring.
+// ReadDeploymentNames Return a list of pair <clue, deployName> containing all the found namespaces whose name contains any given clue as substring.
 func ReadDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSelector string,
 	clues *List.Slist) (*List.Slist, error) {
 
@@ -170,7 +170,7 @@ func SetNumberOfPods(numPods int32, currentNumOfPods *int32,
 	return true, nil
 }
 
-// goroutine for handling SIGTERM
+// TerminationHandler goroutine for handling SIGTERM
 func TerminationHandler(timeout time.Duration) {
 
 	log.Printf("Setting termination handler for process pid = %d", os.Getpid())
@@ -186,4 +186,9 @@ func TerminationHandler(timeout time.Duration) {
 	time.Sleep(timeout)
 
 	os.Exit(0)
+}
+
+// SetTerminationHandler Wrapper for setting the goroutine prepared for handling the SIGTERM
+func SetTerminationHandler(TerminationTimeout time.Duration) {
+	go TerminationHandler(TerminationTimeout)
 }
