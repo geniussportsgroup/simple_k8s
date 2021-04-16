@@ -216,7 +216,9 @@ func TerminationHandlerCont(timeout time.Duration, continuation func(pars ...int
 
 	time.Sleep(timeout)
 
-	continuation(pars...)
+	if continuation != nil {
+		continuation(pars...)
+	}
 
 	os.Exit(0)
 }
