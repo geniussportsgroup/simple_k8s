@@ -183,19 +183,7 @@ func SetNumberOfPods(numPods int32, currentNumOfPods *int32,
 // TerminationHandler goroutine for handling SIGTERM
 func TerminationHandler(timeout time.Duration) {
 
-	log.Printf("Setting termination handler for process pid = %d", os.Getpid())
-	signChannel := make(chan os.Signal, 1)
-
-	signal.Ignore(syscall.SIGINT, syscall.SIGQUIT, syscall.SIGCONT)
-	signal.Notify(signChannel, syscall.SIGTERM)
-
-	sig := <-signChannel
-
-	log.Printf("Termination received (%s)", sig.String())
-
-	time.Sleep(timeout)
-
-	os.Exit(0)
+	TerminationHandlerCont(timeout, nil)
 }
 
 // TerminationHandlerCont set a termination handler. When SIGTERM is received, waits for timeout. Next
@@ -214,11 +202,11 @@ func TerminationHandlerCont(timeout time.Duration, continuation func(pars ...int
 
 	log.Printf("Termination received (%s)", sig.String())
 
-	time.Sleep(timeout)
-
 	if continuation != nil {
 		continuation(pars...)
 	}
+
+	time.Sleep(timeout)
 
 	os.Exit(0)
 }
