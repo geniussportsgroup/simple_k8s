@@ -25,6 +25,10 @@ func CreateHealthyFile(name string) {
 	os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0666)
 }
 
+func RemoveHealthyFile(name string) {
+	_ = os.Remove(name)
+}
+
 func NewKubernetesClient(pathToConf string) (*kubernetes.Clientset, error) {
 	var config *rest.Config
 	var err error
