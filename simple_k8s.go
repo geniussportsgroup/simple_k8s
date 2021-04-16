@@ -194,7 +194,36 @@ func TerminationHandler(timeout time.Duration) {
 	os.Exit(0)
 }
 
+// TerminationHandlerCont set a termination handler. When SIGTERM is received, waits for timeout. Next
+// the continuation function is called with the parameters pars... (it is up programmer to perform the casting).
+// continuation is a point for giving to the programmer some additional actions that they could require
+// before to terminate the process
+func TerminationHandlerCont(timeout time.Duration, continuation func(pars ...interface{}), pars ...interface{}) {
+
+	log.Printf("Setting termination handler for process pid = %d", os.Getpid())
+	signChannel := make(chan os.Signal, 1)
+
+	signal.Ignore(syscall.SIGINT, syscall.SIGQUIT, syscall.SIGCONT)
+	signal.Notify(signChannel, syscall.SIGTERM)
+
+	sig := <-signChannel
+
+	log.Printf("Termination received (%s)", sig.String())
+
+	time.Sleep(timeout)
+
+	continuation(pars...)
+
+	os.Exit(0)
+}
+
 // SetTerminationHandler Wrapper for setting the goroutine prepared for handling the SIGTERM
 func SetTerminationHandler(TerminationTimeout time.Duration) {
 	go TerminationHandler(TerminationTimeout)
+}
+
+// SetTerminationHandlerWithContinuation Wrapper for setting the goroutine prepared for handling the SIGTERM
+func SetTerminationHandlerWithContinuation(TerminationTimeout time.Duration,
+	continuation func(pars ...interface{}), pars ...interface{}) {
+	go TerminationHandlerCont(TerminationTimeout, continuation, pars...)
 }
