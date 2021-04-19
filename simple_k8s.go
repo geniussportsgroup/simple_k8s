@@ -206,8 +206,9 @@ func TerminationHandlerCont(timeout time.Duration, continuation func(pars ...int
 		continuation(pars...)
 	}
 
+	log.Printf("Waiting for %s seconds before to exit", timeout/time.Second)
 	time.Sleep(timeout)
-
+	log.Print("Exiting")
 	os.Exit(0)
 }
 
