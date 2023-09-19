@@ -2,18 +2,19 @@ package simple_k8s
 
 import (
 	"fmt"
+	"log"
+	"net"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthgrpc "google.golang.org/grpc/health/grpc_health_v1"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
-	"log"
-	"net"
 )
 
-const HealthPort = 9666
+const HealthPort = 9667
 const CheckName = "alive"
 
-var healthCheckServer *health.Server
+var healthCheckServer *health.Server = &health.Server{}
 
 func EnableLivelinessCheck() {
 
@@ -23,7 +24,7 @@ func EnableLivelinessCheck() {
 	}
 
 	s := grpc.NewServer()
-	healthCheckServer = health.NewServer()
+	*healthCheckServer = *health.NewServer()
 	healthCheckServer.SetServingStatus(CheckName, healthpb.HealthCheckResponse_SERVING)
 	healthgrpc.RegisterHealthServer(s, healthCheckServer)
 	s.Serve(lis)
