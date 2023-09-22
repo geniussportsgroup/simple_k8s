@@ -11,7 +11,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-const HealthPort = 9667
+const HealthPort = 9666
 const CheckName = "alive"
 
 var healthCheckServer *health.Server = &health.Server{}
