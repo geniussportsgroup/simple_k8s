@@ -3,9 +3,9 @@ module github.com/geniussportsgroup/simple_k8s
 go 1.21
 
 require (
-	github.com/geniussportsgroup/FunctionalLib v1.1.0-pre
-	github.com/geniussportsgroup/Slist v1.1.0-pre
-	github.com/geniussportsgroup/treaps v1.3.0-pre2
+	github.com/geniussportsgroup/FunctionalLib v1.1.0
+	github.com/geniussportsgroup/Slist v1.1.0
+	github.com/geniussportsgroup/treaps v1.3.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.27.1
 	k8s.io/apimachinery v0.28.2
