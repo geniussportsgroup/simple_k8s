@@ -1,13 +1,9 @@
 package simple_k8s
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/geniussportsgroup/FunctionalLib"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"os"
 	"os/signal"
@@ -15,9 +11,17 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/geniussportsgroup/FunctionalLib"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+
 	List "github.com/geniussportsgroup/Slist"
 	Set "github.com/geniussportsgroup/treaps"
 )
+
+var ctx = context.TODO()
 
 const HealthyFileName = "/tmp/healthy"
 
@@ -47,7 +51,7 @@ func NewKubernetesClient(pathToConf string) (*kubernetes.Clientset, error) {
 func FindDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSelector string,
 	clues ...interface{}) (*Set.Treap, error) {
 
-	list, err := kubectl.AppsV1().Deployments(kubeNamespace).List(metav1.ListOptions{
+	list, err := kubectl.AppsV1().Deployments(kubeNamespace).List(ctx, metav1.ListOptions{
 		TypeMeta:            metav1.TypeMeta{},
 		LabelSelector:       labelSelector,
 		FieldSelector:       "",
@@ -93,7 +97,7 @@ func FindDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSele
 func ReadDeploymentNames(kubectl *kubernetes.Clientset, kubeNamespace, labelSelector string,
 	clues *List.Slist) (*List.Slist, error) {
 
-	list, err := kubectl.AppsV1().Deployments(kubeNamespace).List(metav1.ListOptions{
+	list, err := kubectl.AppsV1().Deployments(kubeNamespace).List(ctx, metav1.ListOptions{
 		TypeMeta:            metav1.TypeMeta{},
 		LabelSelector:       labelSelector,
 		FieldSelector:       "",
@@ -141,7 +145,7 @@ func GetNumberOfPods(kubectl *kubernetes.Clientset, kubeNamespace string,
 	deploymentName string) (n int32, err error) {
 
 	result, err := kubectl.AppsV1().Deployments(kubeNamespace).
-		GetScale(deploymentName, metav1.GetOptions{})
+		GetScale(ctx, deploymentName, metav1.GetOptions{})
 	if err != nil {
 		return
 	}
@@ -156,7 +160,7 @@ func SetNumberOfPods(numPods int32, currentNumOfPods *int32,
 
 	// Consult the current number of pods under the deployment
 	scale, err := kubectl.AppsV1().Deployments(kubeNamespace).
-		GetScale(deploymentName, metav1.GetOptions{})
+		GetScale(ctx, deploymentName, metav1.GetOptions{})
 	if err != nil {
 		return false, err
 	}
@@ -170,7 +174,7 @@ func SetNumberOfPods(numPods int32, currentNumOfPods *int32,
 	scale.Spec.Replicas = numPods
 	scale, err = kubectl.AppsV1().
 		Deployments(kubeNamespace).
-		UpdateScale(deploymentName, scale)
+		UpdateScale(ctx, deploymentName, scale, metav1.UpdateOptions{})
 	if err != nil {
 		return false, err
 	}
