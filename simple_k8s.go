@@ -226,3 +226,10 @@ func SetTerminationHandlerWithContinuation(TerminationTimeout time.Duration,
 	continuation func(pars ...interface{}), pars ...interface{}) {
 	go TerminationHandlerCont(TerminationTimeout, continuation, pars...)
 }
+
+// TerminationAndLivelinessWithContinuation Wrapper for setting the goroutine prepared for handling the SIGTERM
+func TerminationAndLivelinessWithContinuation(TerminationTimeout time.Duration,
+	continuation func(pars ...interface{}), pars ...interface{}) {
+	go TerminationHandlerCont(TerminationTimeout, continuation, pars...)
+	go EnableLivelinessCheck()
+}

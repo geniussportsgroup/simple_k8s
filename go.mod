@@ -7,6 +7,7 @@ require (
 	github.com/geniussportsgroup/Slist v1.1.0-pre
 	github.com/geniussportsgroup/treaps v1.3.0-pre2
 	github.com/stretchr/testify v1.8.4
+	google.golang.org/grpc v1.27.1
 	k8s.io/apimachinery v0.20.2
 	k8s.io/client-go v0.20.2
 
@@ -34,6 +35,7 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
