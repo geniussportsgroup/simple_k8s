@@ -14,7 +14,7 @@ import (
 const HealthPort = 9666
 const CheckName = "alive"
 
-var healthCheckServer *health.Server = &health.Server{}
+var healthCheckServer *health.Server = health.NewServer()
 
 func EnableLivelinessCheck() {
 
